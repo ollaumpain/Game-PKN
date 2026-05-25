@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hak dan Kewajiban Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 95%;
+            max-width: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pancasila-bg {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            opacity: 0.05;
+            z-index: 0;
+            width: 200px;
+        }
+
+        .btn-choice {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-choice:hover {
+            transform: scale(1.02);
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .progress-bar-fill {
+            transition: width 0.5s ease-out;
+        }
+
+        .timer-bar {
+            height: 4px;
+            background: #ef4444;
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .music-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 4px solid #fee2e2;
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="music-toggle" onclick="toggleMusic()" title="Aktifkan/Matikan Musik">
+        <span id="music-icon">🔇</span>
+    </div>
+
+    <div class="game-card relative z-10 p-6 md:p-8">
+        <!-- Background Garuda subtle -->
+        <svg class="pancasila-bg" viewBox="0 0 100 100">
+            <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="currentColor"/>
+        </svg>
+
+        <div id="game-header" class="hidden mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Tahap <span id="level-num">1</span></span>
+                    <span id="score-display" class="text-slate-700 font-bold">⭐ 0</span>
+                </div>
+                <div class="text-slate-500 text-sm font-medium">Soal: <span id="q-count">1</span>/5</div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-3">
+                <div id="progress-fill" class="progress-bar-fill bg-red-500 h-3 rounded-full" style="width: 20%"></div>
+            </div>
+            <div id="timer-container" class="mt-4 overflow-hidden rounded-full bg-slate-100">
+                <div id="timer-fill" class="timer-bar"></div>
+            </div>
+        </div>
+
+        <!-- Layar Mulai -->
+        <div id="start-screen" class="screen active text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="logo-container floating">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTM973xsXr5xt5iP7Eah2hrB8friIeDvQKQ2A&s" alt="Logo Indonesia" class="logo-img">
+                </div>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Hak & Kewajiban Challenge</h1>
+            <p class="text-slate-500 mb-8">Jadilah warga negara yang cerdas dan bijak!</p>
+            
+            <div class="bg-blue-50 p-4 rounded-xl mb-8 text-left">
+                <p class="text-sm text-blue-700 font-medium">✨ Musik dan suara penjelasan akan langsung berbunyi secara otomatis setelah kamu memulai!</p>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-transform active:scale-95 text-lg">
+                Mula Bermain 🚀
+            </button>
+        </div>
+
+        <!-- Layar Game -->
+        <div id="game-screen" class="screen">
+            <div id="scenario-box" class="mb-8">
+                <div id="scenario-icon" class="text-5xl mb-4">🏫</div>
+                <h2 id="scenario-title" class="text-xl font-bold text-slate-800 mb-3">Situasi</h2>
+                <p id="scenario-desc" class="text-slate-600 leading-relaxed text-lg">...</p>
+            </div>
+            <div id="choices-container" class="space-y-3"></div>
+        </div>
+
+        <!-- Layar Feedback -->
+        <div id="feedback-screen" class="screen text-center">
+            <div id="feedback-icon" class="text-7xl mb-4">✅</div>
+            <h2 id="feedback-title" class="text-2xl font-bold mb-2">Benar!</h2>
+            <div id="feedback-text" class="bg-slate-50 p-6 rounded-2xl text-slate-700 mb-8 italic">...</div>
+            <button onclick="nextQuestion()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-md">
+                Teruskan Tantangan
+            </button>
+        </div>
+
+        <!-- Layar Hasil -->
+        <div id="result-screen" class="screen text-center">
+            <div class="mb-6"><span id="rank-icon" class="text-8xl">🏆</span></div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-1">Keputusan Akhir</h2>
+            <p id="rank-title" class="text-xl font-bold text-red-600 mb-4 tracking-wide uppercase">Warga Negara Contoh</p>
+            <div class="bg-slate-50 rounded-2xl p-6 mb-8">
+                <div class="text-4xl font-bold text-slate-800 mb-2" id="final-score">0</div>
+                <p class="text-slate-500">Mata Keseluruhan</p>
+            </div>
+            <button onclick="location.reload()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-lg mb-3">
+                Main Semula 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Sistem Audio & Muzik ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMusicPlaying = false;
+        let musicLoopId = null;
+
+        function playTone(freq, type, duration, volume = 0.1, delay = 0) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+            gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + delay + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + duration);
+        }
+
+        // Fungsi Bicara (TTS) - Singkat
+        function speakShort(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.pitch = 1.1;    
+                utterance.rate = 1.1; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playCorrectSfx() {
+            playTone(523.25, 'sine', 0.2, 0.1);      
+            playTone(659.25, 'sine', 0.2, 0.1, 0.1); 
+            playTone(783.99, 'sine', 0.3, 0.1, 0.2); 
+        }
+
+        function playWrongSfx() {
+            playTone(220.00, 'sawtooth', 0.3, 0.05);      
+            playTone(196.00, 'sawtooth', 0.4, 0.05, 0.1); 
+        }
+
+        function playNationalMusicLoop() {
+            if (!isMusicPlaying) return;
+            const notes = [
+                {f: 261.63, d: 0.8}, {f: 261.63, d: 0.8}, {f: 293.66, d: 0.8}, {f: 293.66, d: 0.8},
+                {f: 329.63, d: 0.8}, {f: 329.63, d: 0.8}, {f: 293.66, d: 1.5}, {f: 0, d: 0.5},
+                {f: 349.23, d: 0.8}, {f: 349.23, d: 0.8}, {f: 329.63, d: 0.8}, {f: 329.63, d: 0.8},
+                {f: 293.66, d: 0.8}, {f: 261.63, d: 1.5}
+            ];
+            let cumulativeDelay = 0;
+            notes.forEach((note) => {
+                if(note.f > 0) playTone(note.f, 'sine', note.d, 0.02, cumulativeDelay);
+                cumulativeDelay += note.d * 0.8;
+            });
+            musicLoopId = setTimeout(playNationalMusicLoop, cumulativeDelay * 1000 + 1000);
+        }
+
+        function startMusicAuto() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (!isMusicPlaying) {
+                isMusicPlaying = true;
+                playNationalMusicLoop();
+                document.getElementById('music-icon').innerText = '🔊';
+            }
+        }
+
+        function toggleMusic() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const icon = document.getElementById('music-icon');
+            if (isMusicPlaying) {
+                isMusicPlaying = false;
+                clearTimeout(musicLoopId);
+                icon.innerText = '🔇';
+            } else {
+                isMusicPlaying = true;
+                playNationalMusicLoop();
+                icon.innerText = '🔊';
+            }
+        }
+
+        // --- Logika Permainan ---
+        const scenarios = [
+            {
+                id: 1, level: 1, icon: "🗑️", title: "Kebersihan",
+                description: "Sampah plastik berserakan di depan gerbang sekolah. Apa tindakanmu?",
+                choices: [
+                    { text: "Memungut dan membuangnya ke tempat sampah.", score: 20, feedback: "Bagus! Menjaga kebersihan adalah kewajiban bersama." },
+                    { text: "Melewatinya saja.", score: -5, feedback: "Kurang tepat. Kebersihan adalah tanggung jawab kita semua." },
+                    { text: "Menunggu petugas kebersihan.", score: 5, feedback: "Pasif. Mari membantu tanpa menunggu orang lain." }
+                ],
+                time: 15
+            },
+            {
+                id: 2, level: 1, icon: "🙏", title: "Toleransi",
+                description: "Temanmu sedang beribadah, kamu ingin mengajaknya bermain. Sikapmu?",
+                choices: [
+                    { text: "Menunggu dengan sabar sampai ia selesai.", score: 20, feedback: "Benar! Menghormati hak ibadah orang lain itu penting." },
+                    { text: "Memanggilnya terus menerus.", score: -10, feedback: "Salah. Kita tidak boleh mengganggu orang yang beribadah." },
+                    { text: "Mencari teman lain.", score: 10, feedback: "Cukup baik. Hargailah waktu ibadah temanmu." }
+                ],
+                time: 15
+            },
+            {
+                id: 3, level: 2, icon: "🗳️", title: "Hak Suara",
+                description: "Pemilihan Ketua Kelas berlangsung. Calonnya bukan teman akrabmu. Tindakanmu?",
+                choices: [
+                    { text: "Memilih kandidat yang paling layak.", score: 20, feedback: "Bijak! Pilih pemimpin berdasarkan kemampuannya." },
+                    { text: "Tidak memilih siapa pun.", score: -5, feedback: "Sayang sekali. Gunakan hak suaramu demi masa depan." },
+                    { text: "Memilih asal-asalan.", score: 5, feedback: "Kurang serius. Pilihanmu menentukan kualitas pemimpin." }
+                ],
+                time: 12
+            },
+            {
+                id: 4, level: 2, icon: "🏫", title: "Peraturan",
+                description: "Seragam harus rapi, tapi kamu ingin gaya baju dikeluarkan. Sikapmu?",
+                choices: [
+                    { text: "Tetap merapikan baju sesuai aturan.", score: 20, feedback: "Hebat! Mematuhi aturan adalah kewajiban pelajar." },
+                    { text: "Rapi hanya saat melihat guru.", score: 0, feedback: "Tidak jujur. Disiplin harus dari diri sendiri." },
+                    { text: "Tetap tidak merapikan baju.", score: -10, feedback: "Salah. Patuhi aturan sekolah dengan bangga." }
+                ],
+                time: 12
+            },
+            {
+                id: 5, level: 3, icon: "💰", title: "Pajak",
+                description: "Ayah mengeluh soal pajak kendaraan. Apa pendapatmu?",
+                choices: [
+                    { text: "Jelaskan pajak untuk membangun fasilitas umum.", score: 20, feedback: "Luar biasa! Pajak membangun negara kita bersama." },
+                    { text: "Setuju uangnya dipakai beli mainan saja.", score: -10, feedback: "Kurang tepat. Pajak sangat penting untuk kemajuan negara." },
+                    { text: "Diam saja.", score: 5, feedback: "Pasif. Penting untuk tahu manfaat pajak sejak dini." }
+                ],
+                time: 10
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+
+        function showScreen(screenKey) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenKey + '-screen').classList.add('active');
+            
+            const header = document.getElementById('game-header');
+            if(screenKey === 'game' || screenKey === 'feedback') {
+                header.classList.remove('hidden');
+            } else {
+                header.classList.add('hidden');
+            }
+        }
+
+        function startGame() {
+            startMusicAuto();
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScore(0);
+            loadQuestion();
+            showScreen('game');
+        }
+
+        function loadQuestion() {
+            const q = scenarios[currentQuestionIndex];
+            document.getElementById('level-num').innerText = q.level;
+            document.getElementById('q-count').innerText = currentQuestionIndex + 1;
+            document.getElementById('progress-fill').style.width = `${((currentQuestionIndex + 1) / scenarios.length) * 100}%`;
+            document.getElementById('scenario-icon').innerText = q.icon;
+            document.getElementById('scenario-title').innerText = q.title;
+            document.getElementById('scenario-desc').innerText = q.description;
+            
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+            q.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-choice w-full text-left p-4 rounded-xl font-medium text-slate-700 bg-white shadow-sm';
+                btn.innerText = choice.text;
+                btn.onclick = () => handleChoice(choice);
+                container.appendChild(btn);
+            });
+            startTimer(q.time);
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timer);
+            const bar = document.getElementById('timer-fill');
+            bar.style.width = '100%';
+            let currentWidth = 100;
+            const step = 100 / (seconds * 10);
+            timer = setInterval(() => {
+                currentWidth -= step;
+                bar.style.width = `${currentWidth}%`;
+                if (currentWidth <= 0) {
+                    clearInterval(timer);
+                    handleChoice({ text: "Waktu Habis!", score: -5, feedback: "Cepatlah! Waktu habis." });
+                }
+            }, 100);
+        }
+
+        function handleChoice(choice) {
+            clearInterval(timer);
+            updateScore(choice.score);
+            const isCorrect = choice.score > 0;
+            
+            if (isCorrect) playCorrectSfx(); else playWrongSfx();
+            
+            const voiceText = (isCorrect ? "Benar. " : "Kurang tepat. ") + choice.feedback;
+            speakShort(voiceText);
+
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            feedbackIcon.innerText = isCorrect ? "🌟" : "❌";
+            feedbackTitle.innerText = isCorrect ? "Hebat!" : "Cuba Lagi!";
+            feedbackTitle.className = `text-2xl font-bold mb-2 ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
+            document.getElementById('feedback-text').innerText = choice.feedback;
+            
+            if (!isCorrect) {
+                document.querySelector('.game-card').classList.add('shake');
+                setTimeout(() => document.querySelector('.game-card').classList.remove('shake'), 500);
+            }
+            showScreen('feedback');
+        }
+
+        function updateScore(points) {
+            score += points;
+            if (score < 0) score = 0;
+            document.getElementById('score-display').innerText = `⭐ ${score}`;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < scenarios.length) {
+                loadQuestion();
+                showScreen('game');
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            showScreen('result');
+            document.getElementById('final-score').innerText = score;
+            const rankTitle = document.getElementById('rank-title');
+            
+            let status = "";
+            if (score >= 90) {
+                rankTitle.innerText = "Warga Negara Contoh";
+                status = "Kamu luar biasa!";
+            } else {
+                rankTitle.innerText = "Warga Negara Baik";
+                status = "Pertahankan semangatmu.";
+            }
+            speakShort("Selesai. " + status);
+        }
+    </script>
+</body>
+</html>
